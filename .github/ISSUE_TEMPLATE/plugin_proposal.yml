@@ -1,0 +1,26 @@
+name: Plugin Proposal
+description: Propose a new plugin or major capability extension for DSH
+labels: ["plugin-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: Propose a new plugin to be developed or added to the dsh-plugins monorepo.
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Proposed Plugin Name
+      placeholder: dsh-<name>
+    validations:
+      required: true
+  - type: textarea
+    id: overview
+    attributes:
+      label: Capability Overview
+      description: What problem does this plugin solve for DeepSeek Harness users?
+    validations:
+      required: true
+  - type: textarea
+    id: architecture
+    attributes:
+      label: Architecture & Extension Points
+      description: What Cordis services, hooks, tools, or Web GUI slots will it interact with?

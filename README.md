@@ -1,65 +1,72 @@
-# DeepSeek Harness Plugins
+# DeepSeek Harness Plugins (DSH)
 
-A curated collection of production-grade plugins for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness), extending the AI agent with security guardrails, interactive workspace tools, remote execution capabilities, and introspection utilities.
+[![CI](https://github.com/artemiroshnichenko/dsh-plugins/actions/workflows/ci.yml/badge.svg)](https://github.com/artemiroshnichenko/dsh-plugins/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![DeepSeek Harness](https://img.shields.io/badge/DeepSeek%20Harness-Compatible-059669)](https://github.com/deepseek-ai/deepseek-harness)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-112%20passed-22c55e)](#)
+[![pnpm](https://img.shields.io/badge/pnpm-workspace-orange)](https://pnpm.io/)
 
-All plugins are written in strict TypeScript, validated with [Schemastery](https://github.com/deepseek-ai/schemastery) schemas, and built on the Cordis dependency injection framework and Typert RPC protocol.
+A curated collection of production-grade plugins and extensions for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness).
+
+These plugins turn DeepSeek Harness into a full-featured AI development environment: run agents on remote servers over SSH, browse files and run commands in an integrated Web terminal, enforce security guardrails on tool execution, inspect MCP servers and skills, and dynamically inject environment variables into system prompts.
 
 ---
 
 ## Plugin Directory
 
-| Package | Category | Description | Web UI | Tests |
+| Package | Category | Description | Web GUI | Tests |
 | :--- | :--- | :--- | :---: | :---: |
-| [`dsh-guard`](./packages/dsh-guard) | **Security** | Monotonic tool interception, destructive command prevention, and approval gating | — | 13 |
-| [`dsh-workbench`](./packages/dsh-workbench) | **Developer Experience** | File explorer, terminal emulator (xterm.js), and one-click code block execution |  | 11 |
-| [`dsh-ssh`](./packages/dsh-ssh) | **Remote Execution** | Remote agent execution over SSH with ACP bridge and approval relay |  | 80 |
-| [`dsh-console`](./packages/dsh-console) | **Observability** | Skills & MCP servers inspector panel with `/skills` and `/mcp` slash commands |  | 3 |
-| [`dsh-env`](./packages/dsh-env) | **Prompting** | Dynamic environment variables (`today`, `platform`, `harness_version`) | — | 5 |
+| [`dsh-guard`](./packages/dsh-guard) | **Security & Guardrails** | Monotonic tool interception, destructive command prevention, and approval gating | — | 13 passed |
+| [`dsh-workbench`](./packages/dsh-workbench) | **Developer Tools** | File tree explorer, full terminal emulator (xterm.js), and one-click code runner | Yes | 11 passed |
+| [`dsh-ssh`](./packages/dsh-ssh) | **Remote Execution** | Remote agent execution over SSH with ACP bridge and browser approval relay | Yes | 80 passed |
+| [`dsh-console`](./packages/dsh-console) | **Observability** | Skills & MCP servers inspector panel with `/skills` and `/mcp` slash commands | Yes | 3 passed |
+| [`dsh-env`](./packages/dsh-env) | **System Prompt** | Dynamic environment variables (`today`, `platform`, `harness_version`, etc.) | — | 5 passed |
 
 ---
 
-## Plugins Overview
+## Featured Capabilities
 
-### 1. `dsh-guard`
-Enforces strict security boundaries on tools (`bash`, `write`, `edit`, etc.) before execution:
-- **Instant Denials**: Blocks destructive operations (`rm -rf /`, `mkfs`, fork bombs, raw disk writes) synchronously via `ctx.tools.guard()`.
-- **Approval Gating**: Intercepts potentially unsafe mutations (destructive git commands, system restarts, package publication) using Cordis `tools/pre-execute` waterfall hooks to prompt the user.
-- **Path Isolation**: Confines writes to allowed directory trees and protects sensitive system files (`/etc`, `~/.ssh`).
+### 🛡️ `dsh-guard` — Tool Guardrails & Security Policies
+Protect your workstation and infrastructure against accidental destructive operations before tool execution:
+- **Instant Denials (`ctx.tools.guard`)**: Synchronously rejects catastrophic commands (`rm -rf /`, raw disk writes `dd of=/dev/sd*`, `mkfs`, fork bombs) without consuming token rounds.
+- **Human Approval Gating**: Intercepts dangerous operations (git force-pushes, branch deletions, server restarts, package publishing) and prompts for interactive user approval via Cordis `tools/pre-execute` waterfall hooks.
+- **Filesystem Confinement**: Restricts write and edit tools strictly to permitted workspace boundaries, preventing traversal into sensitive directories (`/etc`, `~/.ssh`).
 
-### 2. `dsh-workbench`
-Turns the DSH Web GUI into a full developer workbench:
-- **File Explorer**: Browse project directories, inspect file contents, view git changes, and compare diffs.
-- **Terminal Emulator**: Full-featured interactive terminal (PTY / xterm.js) embedded into the chat workspace.
-- **Runnable Code Blocks**: Injects interactive "Run" buttons into code blocks in assistant responses for direct execution.
-- **Path Confinement**: Ensures all file access remains strictly inside authorized roots, blocking path traversal and symlink escapes.
+### 💻 `dsh-workbench` — File Explorer & Web Terminal
+An integrated developer workbench embedded right into the DeepSeek Harness Web GUI:
+- **Directory Tree**: Browse files, inspect contents, view modified files, and preview git diffs directly in the sidebar.
+- **Terminal Emulator (xterm.js / PTY)**: A real, responsive terminal session running alongside your agent chat.
+- **Runnable Code Blocks**: Adds an interactive "Run in Terminal" action button to markdown code blocks returned by the model.
+- **Safe Traversal Checks**: Uses hardened path confinement logic to prevent directory traversal and symlink escapes.
 
-### 3. `dsh-ssh`
-Run agents directly on remote servers while keeping the Web GUI and session logs on your workstation:
-- **Agent Client Protocol (ACP)**: Connects via SSH stdio (`ssh <host> dsh --profile acp`) with bidirectional JSON-RPC.
-- **Local Workspace Shadows**: Caches remote project roots under `~/.dsh/remote/<host>/` so workspace registry and sessions work seamlessly.
-- **Approval Relay**: Forwards remote permission requests directly to your local browser approval interface.
-- **Host Management**: Interactive host manager in the Web UI sidebar with directory browsing and connection latency probing.
+### 🌐 `dsh-ssh` — Remote Agent Execution via ACP
+Run DeepSeek Harness agents directly on remote staging, cloud VMs, or production hosts over SSH:
+- **Agent Client Protocol (ACP)**: Connects to remote machines over SSH stdio (`ssh host dsh --profile acp`) with bidirectional JSON-RPC streaming.
+- **Local Workspace Shadows**: Indexes and caches workspace mirrors under `~/.dsh/remote/<host>/`, allowing local session history, search, and context persistence while operations run remotely.
+- **Approval Relay**: Transparently routes remote tool approval requests back to your workstation's local browser UI.
+- **Web GUI Host Switcher**: Switch target servers on the fly from the chat header, browse remote folders, and probe ping latency.
 
-### 4. `dsh-console`
-Comprehensive inspection panel for the agent's capabilities:
-- **Skills & MCP Panel**: Adds a dedicated section to Settings displaying all loaded skills and connected MCP servers.
+### 🔍 `dsh-console` — Skills & MCP Server Inspector
+Complete visibility into your agent's active tooling and runtime configuration:
+- **Settings Panel**: Adds a dedicated "Skills & MCP" panel to the Web GUI settings.
 - **Slash Commands**:
-  - `/skills`: Lists available global and project skills with descriptions and invocation flags.
-  - `/mcp`: Displays active MCP servers, transport types, and tool counts.
-- **Privacy-Preserving**: Strips authorization headers and environment tokens from server inspect responses.
+  - `/skills`: Lists all discovered workspace and global skills, instructions, and invocation arguments.
+  - `/mcp`: Displays active Model Context Protocol (MCP) servers, client transports, and exposed tools.
+- **Privacy-Safe**: Redacts authorization tokens, bearer headers, and environment secrets from inspection output.
 
-### 5. `dsh-env`
-Supplies contextual variables to system prompt templates:
-- **Dynamic Variables**: Interpolates `today`, `platform`, `os_version`, `harness_version`, and custom user-defined variables.
-- **Reactivity**: Updates daily date boundaries and runtime facts automatically across sessions.
+### ⚙️ `dsh-env` — Dynamic Prompt Environment Variables
+Inject real-time runtime facts into agent system prompt templates:
+- **Built-in Variables**: Automatically maintains `today` (date boundary), `platform` (OS name/architecture), `os_version`, and `harness_version`.
+- **Custom Variables**: Define key-value pairs in configuration to supply deployment-specific context.
 
 ---
 
-## Installation & Setup
+## Installation & Usage
 
-### Adding Plugins to DSH
+### Quick Setup
 
-To enable any of these plugins in your DeepSeek Harness deployment, add them to `~/.dsh/cordis.patch.yml`:
+Add the desired plugins to your local `~/.dsh/cordis.patch.yml`:
 
 ```yaml
 - insert:
@@ -77,7 +84,7 @@ To enable any of these plugins in your DeepSeek Harness deployment, add them to 
     - id: env
       name: dsh-env
 
-# For dsh-ssh (replaces local agent-loop with SSH router):
+# To route sessions over SSH (replaces default local agent loop):
 - delete:
     - id: agent-loop
 - insert:
@@ -86,44 +93,76 @@ To enable any of these plugins in your DeepSeek Harness deployment, add them to 
       config:
         hosts:
           - name: staging
-            ssh: ubuntu@staging.internal
-            cwd: /home/ubuntu/app
+            ssh: ubuntu@staging.example.com
+            cwd: /var/www/app
+            port: 22
 ```
+
+Restart your DeepSeek Harness server or reload your profile:
+
+```bash
+dsh web
+```
+
+---
+
+## Architecture & Standards
+
+All plugins in this repository follow DeepSeek Harness architectural standards:
+
+- **Cordis DI Architecture**: Pure service, plugin, and effect registrations via `@deepseek-ai/cordis`.
+- **Strict TypeScript**: Compiled with TypeScript 5.5+ in strict mode (`noImplicitAny`, strict null checks).
+- **Runtime Schemas**: Validated at configuration boundaries using `@deepseek-ai/schemastery`.
+- **Typert RPC Gateway**: Clean host-to-client remote procedure calls using `@deepseek-ai/dsh-typert-protocol`.
+- **Comprehensive Unit Testing**: 112 unit tests powered by Vitest, running against real fixtures without mocking network boundaries.
 
 ---
 
 ## Monorepo Development
 
-### Prerequisites
-- Node.js >= 20.0.0
-- pnpm >= 9.0.0
-
-### Build & Test
-
 ```bash
-# Install dependencies
+# Clone the repository
+git clone https://github.com/artemiroshnichenko/dsh-plugins.git
+cd dsh-plugins
+
+# Install workspace dependencies
 pnpm install
 
-# Build all packages (TypeScript compilation + client asset bundling)
+# Build all packages and Web client bundles
 pnpm build
 
-# Run all test suites across the monorepo (112 tests)
+# Run unit tests across all packages
 pnpm test
 
-# Typecheck without emitting
+# Typecheck the entire codebase
 pnpm typecheck
 ```
 
 ---
 
-## Contributing & PR to DeepSeek Harness
+## Frequently Asked Questions (FAQ)
 
-When submitting plugins or integrating them upstream into `deepseek-ai/deepseek-harness`:
-1. Ensure all code compiles cleanly with `pnpm build`.
-2. Ensure every package has accompanying Vitest unit tests under `packages/<name>/tests/`.
-3. Verify that no personal paths, environment tokens, or machine-specific hostnames exist in the codebase.
-4. Keep client-side extensions decoupled and bundle-free using standard DSH client loader patterns.
+<details>
+<summary><b>Can I use dsh-ssh with password authentication?</b></summary>
+We strongly recommend configuring SSH key authentication or an SSH agent (`ssh-add`) so that DSH can spawn non-interactive background SSH sessions without blocking on terminal password prompts.
+</details>
+
+<details>
+<summary><b>Does dsh-guard slow down tool execution?</b></summary>
+No. Static security rules and pattern inspections run synchronously in sub-millisecond time before commands are dispatched to the shell.
+</details>
+
+<details>
+<summary><b>How does dsh-workbench isolate file operations?</b></summary>
+All file access is validated against real canonical paths (`fs.realpath`) to ensure operations cannot escape authorized project roots via symlinks or <code>..</code> paths.
+</details>
+
+---
+
+## Contributing
+
+Contributions, feature requests, and issue reports are welcome! Please check out [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
 
 ## License
 
-MIT © Artem Miroshnichenko
+[MIT](./LICENSE) © 2026 Artem Miroshnichenko
