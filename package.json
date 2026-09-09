@@ -1,0 +1,17 @@
+{
+  "name": "dsh-plugins-monorepo",
+  "private": true,
+  "description": "Community plugins for DeepSeek Harness (dsh)",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "typecheck": "pnpm -r run typecheck"
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.2",
+    "@types/node": "^26.5.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
