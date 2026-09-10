@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![DeepSeek Harness](https://img.shields.io/badge/DeepSeek%20Harness-Compatible-059669)](https://github.com/deepseek-ai/deepseek-harness)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-112%20passed-22c55e)](#)
+[![Tests](https://img.shields.io/badge/Tests-122%20passed-22c55e)](#)
 [![pnpm](https://img.shields.io/badge/pnpm-workspace-orange)](https://pnpm.io/)
 
 A curated collection of production-grade plugins and extensions for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness).
@@ -22,6 +22,7 @@ These plugins turn DeepSeek Harness into a full-featured AI development environm
 | [`dsh-ssh`](./packages/dsh-ssh) | **Remote Execution** | Remote agent execution over SSH with ACP bridge and browser approval relay | Yes | 80 passed |
 | [`dsh-console`](./packages/dsh-console) | **Observability** | Skills & MCP servers inspector panel with `/skills` and `/mcp` slash commands | Yes | 3 passed |
 | [`dsh-env`](./packages/dsh-env) | **System Prompt** | Dynamic environment variables (`today`, `platform`, `harness_version`, etc.) | — | 5 passed |
+| [`dsh-updater`](./packages/dsh-updater) | **Lifecycle & Updates** | Automated update detection, one-click Web GUI upgrades, and auto-restart | Yes | 10 passed |
 
 ---
 
@@ -60,6 +61,14 @@ Inject real-time runtime facts into agent system prompt templates:
 - **Built-in Variables**: Automatically maintains `today` (date boundary), `platform` (OS name/architecture), `os_version`, and `harness_version`.
 - **Custom Variables**: Define key-value pairs in configuration to supply deployment-specific context.
 
+### 🔄 `dsh-updater` — Update Manager & One-Click Upgrades
+Keep DeepSeek Harness and all community plugins continuously updated right from the Web GUI:
+- **Automatic Version Detection**: Queries the npm registry for new `@deepseek-ai/dsh` releases and monitors git remotes for plugin updates.
+- **Web GUI Settings & Header Badge**: Adds an "Updates" settings page and an alert badge in the conversation header when a new version is published.
+- **Automated Symlink Repair**: Automatically fixes virtual store symlinks when updating `@deepseek-ai/dsh` in pnpm workspaces.
+- **Seamless Auto-Restart**: Restarts the server gracefully in the background while the browser UI automatically detects when it is back online and refreshes.
+- **Slash Commands**: Use `/update` to inspect release versions or `/update now` to upgrade directly from chat.
+
 ---
 
 ## Installation & Usage
@@ -83,6 +92,9 @@ Add the desired plugins to your local `~/.dsh/cordis.patch.yml`:
 
     - id: env
       name: dsh-env
+
+    - id: updater
+      name: dsh-updater
 
 # To route sessions over SSH (replaces default local agent loop):
 - delete:

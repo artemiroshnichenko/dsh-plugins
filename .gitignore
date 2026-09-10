@@ -5,3 +5,24 @@ lib/
 .DS_Store
 *.log
 coverage/
+
+# Environment and secrets
+.env
+.env.*
+*.pem
+*.key
+
+# Strict exclusion of AI instructions, agents, skills, and prompts
+.agents/
+.claude/
+.cursor/
+.antigravity/
+.gemini/
+.openviking/
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+*.ai
+*.prompt
+*.skill
+
