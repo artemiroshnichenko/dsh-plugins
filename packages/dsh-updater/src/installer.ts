@@ -7,6 +7,7 @@ import { expandHome } from "./checker.js";
 import type {
   UpdateExecutionResult,
   UpdateOptions,
+  UpdateProgress,
   UpdateStepResult,
   UpdaterConfig,
 } from "./types.js";
@@ -233,6 +234,7 @@ export async function updatePlugins(
 export async function executeUpdate(
   options: UpdateOptions = {},
   config: UpdaterConfig = {},
+  onProgress?: (progress: UpdateProgress) => void,
 ): Promise<UpdateExecutionResult> {
   const target = options.target || "all";
   const dshInstallDir = config.dshInstallPath || "~/.agents/tools/dsh";
@@ -241,22 +243,53 @@ export async function executeUpdate(
 
   const allSteps: UpdateStepResult[] = [];
   let ok = true;
+  const startedAt = Date.now();
+  const totalSteps = target === "all" ? 4 : 2;
+  let currentStepIndex = 0;
+
+  const report = (phase: string, currentStepName: string, pct: number) => {
+    if (onProgress) {
+      try {
+        onProgress({
+          active: true,
+          target,
+          phase,
+          percent: pct,
+          currentStepIndex,
+          totalSteps,
+          currentStepName,
+          startedAt,
+          steps: [...allSteps],
+        });
+      } catch {}
+    }
+  };
+
+  report("Preparing", "Initializing update pipeline", 5);
 
   if (target === "all" || target === "dsh") {
+    currentStepIndex++;
+    report("Updating DeepSeek Harness", "Installing latest npm packages", 15);
     const dshSteps = await updateDsh(options.dshVersion || "latest", dshInstallDir, profilesDir);
     allSteps.push(...dshSteps);
     if (dshSteps.some((s) => s.status === "failed")) {
       ok = false;
     }
+    report("Synchronizing Profile", "Rebuilding profile symlinks", target === "all" ? 45 : 85);
   }
 
-  if (target === "all" || target === "plugins") {
+  if (ok && (target === "all" || target === "plugins")) {
+    currentStepIndex++;
+    report("Updating Plugins", "Pulling latest git changes", target === "all" ? 60 : 35);
     const pluginSteps = await updatePlugins(pluginsRepoDir);
     allSteps.push(...pluginSteps);
     if (pluginSteps.some((s) => s.status === "failed")) {
       ok = false;
     }
+    report("Building Plugins", "Compiling workspace packages", target === "all" ? 90 : 85);
   }
+
+  report(ok ? "Complete" : "Failed", ok ? "Finalizing update" : "Update encountered errors", 100);
 
   return {
     ok,

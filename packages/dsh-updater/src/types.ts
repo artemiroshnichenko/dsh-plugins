@@ -61,6 +61,18 @@ export interface UpdateExecutionResult {
   error?: string;
 }
 
+export interface UpdateProgress {
+  active: boolean;
+  target?: string;
+  phase: string;
+  percent: number;
+  currentStepIndex: number;
+  totalSteps: number;
+  currentStepName: string;
+  startedAt?: number;
+  steps: UpdateStepResult[];
+}
+
 export interface RestartResult {
   ok: boolean;
   restarting: boolean;

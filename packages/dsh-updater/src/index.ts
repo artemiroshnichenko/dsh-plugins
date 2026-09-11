@@ -11,6 +11,7 @@ import type {
   RestartResult,
   UpdateExecutionResult,
   UpdateOptions,
+  UpdateProgress,
   UpdaterConfig,
 } from "./types.js";
 
@@ -40,7 +41,7 @@ function attachHostProtocolsSync(instance: any, config?: UpdaterConfig) {
       seen.add(protoPath);
       const proto = r(protoPath);
       if (!proto || typeof proto.Remote !== "function") continue;
-      for (const method of ["check", "update", "restart"]) {
+      for (const method of ["check", "update", "restart", "progress"]) {
         try {
           proto.Remote(method)(undefined, {
             kind: "method",
@@ -94,6 +95,7 @@ export default class DshUpdater extends TypertRemoteService {
   private config: UpdaterConfig;
   private lastCheckResult: CheckUpdatesResult | null = null;
   private lastCheckTime = 0;
+  private currentProgress: UpdateProgress | null = null;
 
   constructor(ctx: Context, config: UpdaterConfig = {}) {
     super(ctx, NAMESPACE);
@@ -126,7 +128,22 @@ export default class DshUpdater extends TypertRemoteService {
     const updateTarget = (target === "plugins" || target === "dsh" || target === "all") ? target : "all";
     const shouldRestart = restart !== false;
     const options: UpdateOptions = { target: updateTarget, restart: shouldRestart };
-    const result = await executeUpdate(options, this.config);
+
+    this.currentProgress = {
+      active: true,
+      target: updateTarget,
+      phase: "Starting",
+      percent: 0,
+      currentStepIndex: 0,
+      totalSteps: updateTarget === "all" ? 4 : 2,
+      currentStepName: "Starting update task",
+      startedAt: Date.now(),
+      steps: [],
+    };
+
+    const result = await executeUpdate(options, this.config, (prog) => {
+      this.currentProgress = prog;
+    });
 
     // Refresh cached check after update
     try {
@@ -135,13 +152,36 @@ export default class DshUpdater extends TypertRemoteService {
     } catch {}
 
     if (shouldRestart && result.ok) {
+      if (this.currentProgress) {
+        this.currentProgress.phase = "Restarting";
+        this.currentProgress.currentStepName = "Restarting DeepSeek Harness server";
+        this.currentProgress.percent = 100;
+      }
       // Schedule restart shortly so the RPC response delivers to the browser first
       setTimeout(() => {
         restartDsh(500);
       }, 300);
+    } else if (this.currentProgress) {
+      this.currentProgress.active = false;
     }
 
     return result;
+  }
+
+  @Remote("progress")
+  progress(): UpdateProgress {
+    if (!this.currentProgress) {
+      return {
+        active: false,
+        phase: "Idle",
+        percent: 0,
+        currentStepIndex: 0,
+        totalSteps: 0,
+        currentStepName: "",
+        steps: [],
+      };
+    }
+    return this.currentProgress;
   }
 
   @Remote("restart")

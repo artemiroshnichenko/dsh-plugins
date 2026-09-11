@@ -46,6 +46,7 @@ describe("updater plugin config & schema", () => {
 
     expect(parseParams(proto.check)).toEqual(["force"]);
     expect(parseParams(proto.update)).toEqual(["target", "restart"]);
+    expect(parseParams(proto.progress)).toEqual([]);
     expect(parseParams(proto.restart)).toEqual([]);
   });
 });
