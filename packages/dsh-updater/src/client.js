@@ -75,6 +75,8 @@ window.__ModuleLoader__.load({
       "@keyframes up-spin{to{transform:rotate(360deg)}}",
       ".up-header-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;background:rgba(245,158,11,0.16);color:var(--dsw-alias-state-warn-primary);border:1px solid rgba(245,158,11,0.35);cursor:pointer;user-select:none;transition:all 0.15s ease}",
       ".up-header-chip:hover{background:rgba(245,158,11,0.25);border-color:rgba(245,158,11,0.5);transform:translateY(-1px)}",
+      ".up-sidebar-btn{display:flex;align-items:center;gap:6px;width:100%;margin-bottom:6px;padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;line-height:16px;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.15);color:var(--dsw-alias-state-warn-primary);cursor:pointer;transition:all 0.15s ease;justify-content:flex-start}",
+      ".up-sidebar-btn:hover{background:rgba(245,158,11,0.25);border-color:rgba(245,158,11,0.6);transform:translateY(-1px)}",
     ].join("\n");
 
     function installStyles(ctx) {
@@ -326,21 +328,93 @@ window.__ModuleLoader__.load({
       const latestVer = status.dsh && status.dsh.updateAvailable ? status.dsh.latest : null;
       const label = latestVer ? `⚡ Update available (v${latestVer})` : "⚡ Updates available";
 
+      const openSettingsModal = () => {
+        const trigger = document.querySelector('button[aria-haspopup="dialog"]');
+        if (trigger) {
+          trigger.click();
+          setTimeout(() => {
+            const navCells = Array.from(document.querySelectorAll('nav button'));
+            const updateTab = navCells.find(b => b.textContent && (b.textContent.includes("Updates") || b.textContent.includes("Обновления") || b.textContent.includes("系统更新")));
+            if (updateTab) updateTab.click();
+          }, 60);
+        } else {
+          alert("Update available! Please open Settings → Updates.");
+        }
+      };
+
       return h("div", {
         className: "up-header-chip",
         title: "Click to open Updates in Settings and upgrade DeepSeek Harness",
-        onClick: () => {
-          // Open Settings modal by triggering the settings trigger if available
-          const settingsBtn = document.querySelector('[data-slot="sidebar.settings"], button[aria-label*="Settings"], button[aria-label*="设置"]');
-          if (settingsBtn) {
-            settingsBtn.click();
-          } else {
-            alert("Update available! Please open Settings → Updates to upgrade.");
-          }
-        },
+        onClick: openSettingsModal,
       },
         h("span", { className: "up-badge-dot up-badge-dot--pulse" }),
         label);
+    }
+
+    // ── Sidebar Footer Action: UpdateSidebarAction ─────────────────────────────
+    function UpdateSidebarAction({ wide, callRpc }) {
+      const [status, setStatus] = useState(null);
+
+      useEffect(() => {
+        let alive = true;
+        const doCheck = () => {
+          callRpc("check", false)
+            .then((res) => {
+              if (alive) setStatus(res);
+            })
+            .catch(() => {});
+        };
+        doCheck();
+        const interval = setInterval(doCheck, 15 * 60 * 1000);
+        return () => {
+          alive = false;
+          clearInterval(interval);
+        };
+      }, []);
+
+      if (!status || !status.hasAnyUpdates) {
+        return null;
+      }
+
+      const latestVer = status.dsh && status.dsh.updateAvailable ? status.dsh.latest : null;
+      const label = latestVer ? `⚡ Update (v${latestVer})` : "⚡ Update available";
+
+      const openSettingsModal = () => {
+        const trigger = document.querySelector('button[aria-haspopup="dialog"]');
+        if (trigger) {
+          trigger.click();
+          setTimeout(() => {
+            const navCells = Array.from(document.querySelectorAll('nav button'));
+            const updateTab = navCells.find(b => b.textContent && (b.textContent.includes("Updates") || b.textContent.includes("Обновления") || b.textContent.includes("系统更新")));
+            if (updateTab) updateTab.click();
+          }, 60);
+        } else {
+          alert("Update available! Please open Settings → Updates.");
+        }
+      };
+
+      if (!wide) {
+        return h("button", {
+          type: "button",
+          className: "up-sidebar-btn",
+          style: { width: "36px", height: "36px", padding: 0, justifyContent: "center", margin: "0 auto 6px auto" },
+          title: `DeepSeek Harness ${label}. Click to open Updates.`,
+          onClick: openSettingsModal,
+        },
+          h("span", { className: "up-badge-dot up-badge-dot--pulse" }),
+          "⚡"
+        );
+      }
+
+      return h("button", {
+        type: "button",
+        className: "up-sidebar-btn",
+        title: `DeepSeek Harness ${label}. Click to open Updates.`,
+        onClick: openSettingsModal,
+      },
+        h("span", { className: "up-badge-dot up-badge-dot--pulse" }),
+        h("span", null, label)
+      );
     }
 
     // ── Plugin Apply ───────────────────────────────────────────────────────────
@@ -369,6 +443,15 @@ window.__ModuleLoader__.load({
           locale: NS,
           inject: () => ({ callRpc }),
         }, UpdatesSection));
+
+      // Register Sidebar Footer Action (always visible above Settings gear)
+      ctx.slots.inject("sidebar.footer.action", () =>
+        ctx.slots.register({
+          name: "sidebar.footer.action",
+          id: "dsh-updater-sidebar",
+          order: 0,
+          inject: () => ({ callRpc }),
+        }, UpdateSidebarAction));
 
       // Register Header Action Badge in conversation header
       ctx.slots.inject("conversation.session.header.actions", () =>
