@@ -929,7 +929,7 @@ window.__ModuleLoader__.load({
     }
 
     // ── Client Plugin Entrypoint ───────────────────────────────────────────────
-    exports.default = function apply(ctx) {
+    function apply(ctx) {
       installStyles(ctx);
 
       const tRu = ctx.get("@deepseek-ai/dsh-client-locale");
@@ -952,38 +952,69 @@ window.__ModuleLoader__.load({
         } else if (typeof args === "boolean") {
           safeArgs = { force: args };
         }
-        return ctx.connection.rpc.call("/api", `dshUpdater/${method}`, { args: safeArgs });
+        // Шлюз отвечает конвертом {ok, value} либо {ok:false, error}. Компоненты
+        // читают поля ответа напрямую, поэтому конверт распаковывается здесь —
+        // иначе status.dsh оказывается undefined и версии остаются многоточиями.
+        return ctx.connection.rpc.call("/api", `dshUpdater/${method}`, { args: safeArgs })
+          .then((r) => {
+            if (r && r.ok) return r.value;
+            const e = r && r.error;
+            throw new Error(e ? `${e.code}: ${e.message}` : "rpc failed");
+          });
       };
 
-      // Register Settings Page
-      const settings = ctx.get("@deepseek-ai/dsh-client-ui-settings");
-      if (settings && typeof settings.registerPage === "function") {
-        settings.registerPage({
-          id: "updates",
-          title: "settings.dshUpdater.nav",
-          icon: () => h(IconDownload, { size: 16 }),
-          order: 950,
-          render: () => h(UpdatesSection, { callRpc }),
-        });
-      }
+      // Каждая поверхность занимает штатное гнездо. Имя гнезда идёт полем `name`
+      // в описании, а сам компонент — вторым доводом; строка первым доводом даёт
+      // «slot "undefined" is not declared». Регистрация ждёт объявления гнезда
+      // через slots.inject, иначе она может опередить владельца.
 
-      // Register Sidebar action when updates are available
-      if (ctx.slots && typeof ctx.slots.register === "function") {
-        ctx.slots.register("sidebar.footer.actions", {
+      // Страница «Обновления» в настройках.
+      ctx.slots.inject("settings.section", () =>
+        ctx.slots.register({
+          name: "settings.section",
+          id: "dsh-updater",
+          order: 950,
+          label: () => "Updates",
+          inject: () => ({ callRpc }),
+        }, UpdatesSection)
+      );
+
+      // Отметка в подвале боковой панели, когда есть что обновить.
+      ctx.slots.inject("sidebar.footer.action", () =>
+        ctx.slots.register({
+          name: "sidebar.footer.action",
           id: "dsh-updater-sidebar-badge",
           order: 85,
-          render: (props) => h(UpdateSidebarAction, Object.assign({}, props, { callRpc })),
-        });
-      }
+          inject: () => ({ callRpc }),
+        }, UpdateSidebarAction)
+      );
 
-      // Register conversation header chip
-      if (ctx.slots && typeof ctx.slots.register === "function") {
-        ctx.slots.register("conversation.header.actions", {
+      // Плашка в заголовке открытой сессии.
+      ctx.slots.inject("conversation.session.header.actions", () =>
+        ctx.slots.register({
+          name: "conversation.session.header.actions",
           id: "dsh-updater-header-badge",
           order: 10,
-          render: () => h(UpdateBadgeAction, { callRpc }),
-        });
-      }
-    };
+          inject: () => ({ callRpc }),
+        }, UpdateBadgeAction)
+      );
+    }
+
+    // Загрузчик берёт значение, которое ВЕРНУЛА фабрика, и ищет в нём `apply`.
+    // Без этих двух строк модуль остаётся undefined — ровно то, на что ругается
+    // «invalid plugin, expect function or object with an "apply" method».
+    // Cordis пускает к службе только по объявленному inject: без списка обращение
+    // к ctx.slots падает с «cannot get property "slots" without inject».
+    // ctx.get(...) и ctx.effect в списке не нуждаются.
+    // Загрузчик разворачивает `default` в голую функцию, и объявленный рядом
+    // список инъекций при этом теряется — отсюда «cannot get property "slots"
+    // without inject». Поэтому default не экспортируем вовсе, как и в остальных
+    // плагинах: наружу идут только apply и inject. Список продублирован на самой
+    // функции на случай, если развернут всё-таки её.
+    const inject = ["slots", "connection"];
+    apply.inject = inject;
+    exports.apply = apply;
+    exports.inject = inject;
+    return module.exports;
   },
 });
