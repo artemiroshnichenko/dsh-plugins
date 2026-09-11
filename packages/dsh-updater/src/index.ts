@@ -1,7 +1,9 @@
 import { Remote, TypertRemoteService } from "@deepseek-ai/dsh-typert-protocol";
 import Schema from "@deepseek-ai/schemastery";
 import type { Context } from "@deepseek-ai/cordis";
-import { checkAllUpdates } from "./checker.js";
+import { createRequire } from "node:module";
+import path from "node:path";
+import { checkAllUpdates, expandHome } from "./checker.js";
 import { executeUpdate } from "./installer.js";
 import { restartDsh } from "./restarter.js";
 import type {
@@ -11,6 +13,49 @@ import type {
   UpdateOptions,
   UpdaterConfig,
 } from "./types.js";
+
+function attachHostProtocolsSync(instance: any, config?: UpdaterConfig) {
+  const home = process.env.HOME || "";
+  const dshHome = process.env.DSH_HOME || path.join(home, ".dsh");
+  const candidates = [
+    path.join(dshHome, "profiles/node_modules"),
+    path.join(home, ".dsh/profiles/node_modules"),
+    path.join(home, ".agents/tools/dsh/node_modules"),
+  ];
+  if (config?.profilesPath) {
+    candidates.unshift(path.join(expandHome(config.profilesPath), "node_modules"));
+  }
+  if (config?.dshInstallPath) {
+    candidates.unshift(path.join(expandHome(config.dshInstallPath), "node_modules"));
+  }
+
+  const seen = new Set<string>();
+  for (const dir of candidates) {
+    if (!dir || seen.has(dir)) continue;
+    seen.add(dir);
+    try {
+      const r = createRequire(path.join(dir, "dummy.js"));
+      const protoPath = r.resolve("@deepseek-ai/dsh-typert-protocol");
+      if (seen.has(protoPath)) continue;
+      seen.add(protoPath);
+      const proto = r(protoPath);
+      if (!proto || typeof proto.Remote !== "function") continue;
+      for (const method of ["check", "update", "restart"]) {
+        try {
+          proto.Remote(method)(undefined, {
+            kind: "method",
+            name: method,
+            static: false,
+            private: false,
+            addInitializer: (fn: (this: any) => void) => {
+              try { fn.call(instance); } catch {}
+            },
+          });
+        } catch {}
+      }
+    } catch {}
+  }
+}
 
 export * from "./types.js";
 export * from "./version.js";
@@ -53,6 +98,7 @@ export default class DshUpdater extends TypertRemoteService {
   constructor(ctx: Context, config: UpdaterConfig = {}) {
     super(ctx, NAMESPACE);
     this.config = config;
+    attachHostProtocolsSync(this, config);
 
     if (config.enableCommands !== false) {
       this.registerCommands();
@@ -60,11 +106,12 @@ export default class DshUpdater extends TypertRemoteService {
   }
 
   @Remote("check")
-  async check(force = false): Promise<CheckUpdatesResult> {
+  async check(force?: boolean): Promise<CheckUpdatesResult> {
+    const isForce = Boolean(force);
     const now = Date.now();
     const cacheValidMs = 60 * 1000; // 1 minute cache for fast UI polling
 
-    if (!force && this.lastCheckResult && now - this.lastCheckTime < cacheValidMs) {
+    if (!isForce && this.lastCheckResult && now - this.lastCheckTime < cacheValidMs) {
       return this.lastCheckResult;
     }
 
@@ -75,7 +122,10 @@ export default class DshUpdater extends TypertRemoteService {
   }
 
   @Remote("update")
-  async update(options: UpdateOptions = {}): Promise<UpdateExecutionResult> {
+  async update(target?: string, restart?: boolean): Promise<UpdateExecutionResult> {
+    const updateTarget = (target === "plugins" || target === "dsh" || target === "all") ? target : "all";
+    const shouldRestart = restart !== false;
+    const options: UpdateOptions = { target: updateTarget, restart: shouldRestart };
     const result = await executeUpdate(options, this.config);
 
     // Refresh cached check after update
@@ -84,7 +134,7 @@ export default class DshUpdater extends TypertRemoteService {
       this.lastCheckTime = Date.now();
     } catch {}
 
-    if (options.restart && result.ok) {
+    if (shouldRestart && result.ok) {
       // Schedule restart shortly so the RPC response delivers to the browser first
       setTimeout(() => {
         restartDsh(500);
@@ -110,7 +160,7 @@ export default class DshUpdater extends TypertRemoteService {
         const text = String(invocation.text ?? "").trim().toLowerCase();
 
         if (text === "now" || text === "all") {
-          const res = await this.update({ target: "all", restart: true });
+          const res = await this.update("all", true);
           if (!res.ok) {
             return {
               kind: "error",

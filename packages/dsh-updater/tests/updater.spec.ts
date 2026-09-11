@@ -24,4 +24,28 @@ describe("updater plugin config & schema", () => {
     expect(cfg.enableCommands).toBe(false);
     expect(cfg.dshInstallPath).toBe("/custom/dsh");
   });
+
+  it("exposes remote methods with valid SRC signatures without defaults or destructuring", async () => {
+    const DshUpdater = (await import("../src/index.js")).default;
+    const proto = DshUpdater.prototype as any;
+
+    const parseParams = (fn: Function) => {
+      const source = Function.prototype.toString.call(fn);
+      const open = source.indexOf("(");
+      const close = source.indexOf(")", open + 1);
+      const body = source.slice(open + 1, close).trim();
+      if (body.length === 0) return [];
+      const parts = body.split(",").map((p) => p.trim());
+      for (const part of parts) {
+        if (!/^[$A-Z_a-z][$\w]*$/u.test(part)) {
+          throw new Error(`Invalid parameter "${part}" in ${source}`);
+        }
+      }
+      return parts;
+    };
+
+    expect(parseParams(proto.check)).toEqual(["force"]);
+    expect(parseParams(proto.update)).toEqual(["target", "restart"]);
+    expect(parseParams(proto.restart)).toEqual([]);
+  });
 });
