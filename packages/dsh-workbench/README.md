@@ -7,8 +7,8 @@ DeepSeek Harness conversation view focuses on messages. `dsh-workbench` introduc
 ## Features
 
 - **Integrated Files Tab**: Browse workspace files with Git status badges (untracked, modified, staged, deleted, conflict).
-- **In-Browser Text Editor**: Syntax highlighting, line numbers, and safe saving backed by modification timestamps to prevent overwriting concurrent changes.
-- **Git Diffs**: Colorized unified diff viewer with branch indicators and staged/unstaged change inspection.
+- **In-Browser Text Editor**: Live syntax highlighting for TypeScript, JavaScript, Python, Rust, Go, Shell, JSON, YAML, TOML, Markdown, HTML, CSS, SQL. Includes a line numbers gutter, tab indentation, and `Cmd+S` saving.
+- **Visual Git Diffs**: Unified diff viewer with old and new line numbers, syntax highlighting inside added/deleted lines, hunk headers, and addition/deletion badges.
 - **Persistent Terminal Tab**: Web-based terminal emulator retaining directory state (`cd`) across executions.
 - **Runnable Code Blocks**: Adds an interactive "Run" button to shell code snippets in conversation messages for quick 1-click execution.
 - **Security Confinement**: All file access strictly confined within the active session workspace root. Traversal and symlink escapes are prevented.

@@ -74,6 +74,54 @@ window.__ModuleLoader__.load({
       ".wb-diff-hunk{color:var(--dsw-alias-brand-primary)}",
       ".wb-diff-meta{color:var(--dsw-alias-label-tertiary)}",
       ".wb-dirty{color:var(--dsw-alias-state-warn-label)}",
+      // header badges & indicators
+      ".wb-badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-brand-primary);letter-spacing:0.5px}",
+      ".wb-status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}",
+      ".wb-status-dot--clean{background:var(--dsw-alias-state-success-primary)}",
+      ".wb-status-dot--dirty{background:var(--dsw-alias-state-warn-label)}",
+      // editor with gutter and syntax overlay
+      ".wb-editor-wrap{flex:1;min-height:0;display:flex;position:relative;overflow:hidden;background:var(--dsw-alias-bg-layer-1)}",
+      ".wb-gutter{flex:0 0 auto;min-width:44px;overflow:hidden;background:var(--dsw-alias-bg-layer-2);border-right:1px solid var(--dsw-alias-border-l2);user-select:none;box-sizing:border-box}",
+      ".wb-gutter-text{margin:0;padding:10px 10px 10px 0;text-align:right;color:var(--dsw-alias-label-tertiary);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:20px;font-variant-numeric:tabular-nums;white-space:pre}",
+      ".wb-editor-viewport{position:relative;flex:1;min-height:0;min-width:0;overflow:hidden}",
+      ".wb-editor-highlight{position:absolute;top:0;left:0;min-width:100%;pointer-events:none;box-sizing:border-box}",
+      ".wb-code-pre{margin:0;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:20px;tab-size:2;-moz-tab-size:2;white-space:pre;word-wrap:normal;overflow-wrap:normal;color:var(--shiki-foreground,var(--dsw-alias-label-primary))}",
+      ".wb-editor-input{position:absolute;top:0;left:0;width:100%;height:100%;box-sizing:border-box;margin:0;padding:10px 12px;border:0;outline:0;resize:none;background:transparent;color:transparent;caret-color:var(--dsw-alias-label-primary);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:20px;tab-size:2;-moz-tab-size:2;white-space:pre;word-wrap:normal;overflow:auto}",
+      ".wb-editor-input::selection{background:var(--dsw-alias-interactive-bg-hover,rgba(56,139,253,0.3));color:transparent}",
+      // syntax highlighting tokens
+      ".wb-tok-kw{color:var(--shiki-token-keyword);font-weight:500}",
+      ".wb-tok-str{color:var(--shiki-token-string)}",
+      ".wb-tok-regex{color:var(--shiki-token-string-expression,var(--shiki-token-string))}",
+      ".wb-tok-com{color:var(--shiki-token-comment);font-style:italic}",
+      ".wb-tok-fn{color:var(--shiki-token-function)}",
+      ".wb-tok-num{color:var(--shiki-token-constant)}",
+      ".wb-tok-bool{color:var(--shiki-token-constant);font-weight:500}",
+      ".wb-tok-type{color:var(--shiki-token-parameter)}",
+      ".wb-tok-prop{color:var(--shiki-token-constant)}",
+      ".wb-tok-tag{color:var(--shiki-token-keyword)}",
+      ".wb-tok-attr{color:var(--shiki-token-function)}",
+      ".wb-tok-punc{color:var(--shiki-token-punctuation)}",
+      ".wb-tok-op{color:var(--shiki-token-punctuation)}",
+      ".wb-tok-var{color:var(--shiki-token-parameter)}",
+      ".wb-tok-head{color:var(--shiki-token-keyword);font-weight:600}",
+      // improved diff view
+      ".wb-diff-view{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--dsw-alias-bg-layer-1);overflow:hidden}",
+      ".wb-diff-bar{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--dsw-alias-bg-layer-2);border-bottom:1px solid var(--dsw-alias-border-l2)}",
+      ".wb-diff-badge{font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px}",
+      ".wb-diff-badge--add{background:rgba(46,160,67,0.2);color:var(--dsw-alias-state-success-primary)}",
+      ".wb-diff-badge--del{background:rgba(248,81,73,0.2);color:var(--dsw-alias-state-error-primary)}",
+      ".wb-diff-scroll{flex:1;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:20px}",
+      ".wb-diff-row{display:flex;align-items:stretch;min-width:max-content;white-space:pre}",
+      ".wb-diff-row:hover{background:var(--dsw-alias-interactive-bg-hover)}",
+      ".wb-diff-row--add{background:rgba(46,160,67,0.12)}",
+      ".wb-diff-row--del{background:rgba(248,81,73,0.12)}",
+      ".wb-diff-row--hunk{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary);font-weight:500;padding:2px 0}",
+      ".wb-diff-row--meta{color:var(--dsw-alias-label-tertiary);opacity:.8}",
+      ".wb-diff-num{width:38px;padding-right:8px;text-align:right;color:var(--dsw-alias-label-tertiary);user-select:none;flex-shrink:0;font-variant-numeric:tabular-nums}",
+      ".wb-diff-mark{width:18px;text-align:center;user-select:none;flex-shrink:0;font-weight:600}",
+      ".wb-diff-row--add .wb-diff-mark{color:var(--dsw-alias-state-success-primary)}",
+      ".wb-diff-row--del .wb-diff-mark{color:var(--dsw-alias-state-error-primary)}",
+      ".wb-diff-line{flex:1;padding-right:12px;white-space:pre}",
       // terminal
       ".wb-term{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--dsw-alias-bg-layer-1)}",
       ".wb-term__log{flex:1;min-height:0;overflow:auto;padding:10px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}",
@@ -153,16 +201,346 @@ window.__ModuleLoader__.load({
       return h("div", { className: "wb-crumbs" }, nodes);
     }
 
-    function DiffText({ text }) {
-      const lines = useMemo(() => text.split("\n"), [text]);
-      return h("pre", { className: "wb-code" }, lines.map((line, i) => {
-        const cls = line.startsWith("+++") || line.startsWith("---") || line.startsWith("diff ") || line.startsWith("index ")
-          ? "wb-diff-meta"
-          : line.startsWith("@@") ? "wb-diff-hunk"
-          : line.startsWith("+") ? "wb-diff-add"
-          : line.startsWith("-") ? "wb-diff-del" : "";
-        return h("div", { key: i, className: cls }, line === "" ? " " : line);
-      }));
+// ── syntax highlighting tokenizer & grammars ────────────────────────
+    const COMMON_KW = "break|case|catch|class|const|continue|debugger|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|new|return|super|switch|this|throw|try|typeof|var|void|while|with|yield";
+    const JS_KW = COMMON_KW + "|let|static|implements|interface|package|private|protected|public|enum|as|async|await|of|from|type|declare|namespace|abstract|override|readonly";
+    const PY_KW = "and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield|match|case";
+    const RS_KW = "as|async|await|break|const|continue|crate|dyn|else|enum|extern|false|fn|for|if|impl|in|let|loop|match|mod|move|mut|pub|ref|return|self|Self|static|struct|super|trait|true|type|unsafe|use|where|while";
+    const GO_KW = "break|case|chan|const|continue|default|defer|else|fallthrough|for|func|go|goto|if|import|interface|map|package|range|return|select|struct|switch|type|var";
+    const SH_KW = "if|then|else|elif|fi|case|esac|for|while|until|do|done|in|function|select|time|return|exit|export|local|declare|alias";
+    const SQL_KW = "SELECT|FROM|WHERE|INSERT|INTO|UPDATE|DELETE|JOIN|LEFT|RIGHT|INNER|OUTER|ON|GROUP|BY|ORDER|HAVING|LIMIT|OFFSET|AS|AND|OR|NOT|IN|IS|NULL|CREATE|TABLE|DROP|ALTER|INDEX|VIEW|UNION|ALL|DISTINCT|CASE|WHEN|THEN|ELSE|END";
+
+    const GRAMMARS = {
+      js: [
+        { type: "com", pattern: /\/\/[^\n]*|\/\*[\s\S]*?\*\// },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\[\s\S]|[^`\\])*`/ },
+        { type: "regex", pattern: /\/(?![*\/])(?:\\.|[^/\\\n])+\/[gimsuy]*/ },
+        { type: "num", pattern: /\b(?:0[xXbBoO][0-9a-fA-F_]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/ },
+        { type: "bool", pattern: /\b(?:true|false|null|undefined|NaN|Infinity)\b/ },
+        { type: "kw", pattern: new RegExp(`\\b(?:${JS_KW})\\b`) },
+        { type: "type", pattern: /\b(?:any|boolean|never|number|string|symbol|unknown|void|Array|Record|Promise|Map|Set|Object|Function)\b|\b[A-Z][a-zA-Z0-9_$]*\b/ },
+        { type: "fn", pattern: /\b[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()/ },
+        { type: "prop", pattern: /\b[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*:)/ },
+        { type: "op", pattern: /=>|===|!==|==|!=|<=|>=|&&|\|\||\?\?|\+\+|--|[+\-*\/%&|^!=<>?~:]/ },
+        { type: "punc", pattern: /[{}\[\]();,.]/ },
+      ],
+      py: [
+        { type: "com", pattern: /#[^\n]*/ },
+        { type: "str", pattern: /"""[\s\S]*?"""|'''[\s\S]*?'''|f?"(?:\\.|[^"\\])*"|f?'(?:\\.|[^'\\])*'/ },
+        { type: "num", pattern: /\b(?:0[xXbBoO][0-9a-fA-F_]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\b/ },
+        { type: "bool", pattern: /\b(?:True|False|None)\b/ },
+        { type: "kw", pattern: new RegExp(`\\b(?:${PY_KW})\\b`) },
+        { type: "fn", pattern: /(?:def\s+)([a-zA-Z_]\w*)|\b[a-zA-Z_]\w*(?=\s*\()/ },
+        { type: "type", pattern: /\b(?:int|float|str|bool|list|dict|set|tuple|bytes|object)\b|\b[A-Z][a-zA-Z0-9_]*\b/ },
+        { type: "var", pattern: /@[a-zA-Z_]\w*/ },
+        { type: "op", pattern: /==|!=|<=|>=|:=|\*\*|\/\/|>>|<<|[+\-*\/%&|^!=<>~]/ },
+        { type: "punc", pattern: /[{}\[\]();,.:]/ },
+      ],
+      json: [
+        { type: "prop", pattern: /"(?:\\.|[^"\\])*"(?=\s*:)/ },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"/ },
+        { type: "num", pattern: /-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/ },
+        { type: "bool", pattern: /\b(?:true|false|null)\b/ },
+        { type: "punc", pattern: /[{}\[\](),:]/ },
+      ],
+      sh: [
+        { type: "com", pattern: /#[^\n]*/ },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"|'[^']*'/ },
+        { type: "var", pattern: /\$[a-zA-Z_][a-zA-Z0-9_]*|\$\{[^}]+\}/ },
+        { type: "kw", pattern: new RegExp(`\\b(?:${SH_KW})\\b`) },
+        { type: "num", pattern: /\b\d+\b/ },
+        { type: "op", pattern: /&&|\|\||;;|<<|>>|[|&;><=]/ },
+        { type: "punc", pattern: /[{}\[\]()]/ },
+      ],
+      yaml: [
+        { type: "com", pattern: /#[^\n]*/ },
+        { type: "prop", pattern: /^[ \t]*[\w.-]+(?=\s*:)/m },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/ },
+        { type: "bool", pattern: /\b(?:true|false|yes|no|null)\b/i },
+        { type: "num", pattern: /\b\d+(?:\.\d+)?\b/ },
+        { type: "punc", pattern: /[:-]/ },
+      ],
+      sql: [
+        { type: "com", pattern: /--[^\n]*|\/\*[\s\S]*?\*\// },
+        { type: "str", pattern: /'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"/ },
+        { type: "kw", pattern: new RegExp(`\\b(?:${SQL_KW})\\b`, "i") },
+        { type: "num", pattern: /\b\d+(?:\.\d+)?\b/ },
+        { type: "bool", pattern: /\b(?:TRUE|FALSE|NULL)\b/i },
+        { type: "op", pattern: /<>|!=|<=|>=|[=<>+\-*\/%]/ },
+        { type: "punc", pattern: /[();,.]/ },
+      ],
+      rust: [
+        { type: "com", pattern: /\/\/[^\n]*|\/\*[\s\S]*?\*\// },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"|r#*"[\s\S]*?"#*/ },
+        { type: "num", pattern: /\b(?:0[xXbBoO][0-9a-fA-F_]+|\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)(?:[ui](?:8|16|32|64|128|size)|f(?:32|64))?\b/ },
+        { type: "kw", pattern: new RegExp(`\\b(?:${RS_KW})\\b`) },
+        { type: "type", pattern: /\b(?:bool|char|i8|i16|i32|i64|i128|isize|u8|u16|u32|u64|u128|usize|f32|f64|str|Option|Result|Vec|String)\b|\b[A-Z][a-zA-Z0-9_]*\b/ },
+        { type: "fn", pattern: /\b[a-zA-Z_]\w*!(?=\s*[({\[])|\b[a-zA-Z_]\w*(?=\s*\()/ },
+        { type: "op", pattern: /=>|->|::|==|!=|<=|>=|&&|\|\||[+\-*\/%&|^!=<>?]/ },
+        { type: "punc", pattern: /[{}\[\]();,.]/ },
+      ],
+      html: [
+        { type: "com", pattern: /<!--[\s\S]*?-->/ },
+        { type: "tag", pattern: /<\/?[a-zA-Z0-9-]+(?=\s|>|\/)/ },
+        { type: "attr", pattern: /[a-zA-Z0-9_-]+(?=\s*=)/ },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/ },
+        { type: "op", pattern: /[=>\/]/ },
+        { type: "punc", pattern: /[<>]/ },
+      ],
+      css: [
+        { type: "com", pattern: /\/\*[\s\S]*?\*\// },
+        { type: "str", pattern: /"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/ },
+        { type: "prop", pattern: /[a-zA-Z-]+(?=\s*:)/ },
+        { type: "num", pattern: /#[0-9a-fA-F]{3,8}|\b\d+(?:\.\d+)?(?:px|em|rem|%|vh|vw|s|ms|deg|fr)?\b/ },
+        { type: "fn", pattern: /\b(?:var|calc|rgb|rgba|hsl|hsla|linear-gradient|url)(?=\s*\()/ },
+        { type: "kw", pattern: /@(?:media|import|keyframes|supports|font-face)\b|!(?:important)\b/ },
+        { type: "punc", pattern: /[{}\[\]():;,]/ },
+      ],
+      markdown: [
+        { type: "head", pattern: /^#{1,6}\s+[^\n]*/m },
+        { type: "com", pattern: /<!--[\s\S]*?-->/ },
+        { type: "str", pattern: /`[^`\n]+`/ },
+        { type: "kw", pattern: /^\s*(?:[*+-]|\d+\.)\s+/m },
+        { type: "fn", pattern: /\[[^\]]+\]\([^)]+\)/ },
+        { type: "op", pattern: /[*_~]{1,2}/ },
+      ],
+    };
+
+    GRAMMARS.typescript = GRAMMARS.js;
+    GRAMMARS.javascript = GRAMMARS.js;
+    GRAMMARS.jsx = GRAMMARS.js;
+    GRAMMARS.tsx = GRAMMARS.js;
+    GRAMMARS.jsonc = GRAMMARS.json;
+    GRAMMARS.python = GRAMMARS.py;
+    GRAMMARS.bash = GRAMMARS.sh;
+    GRAMMARS.shell = GRAMMARS.sh;
+    GRAMMARS.zsh = GRAMMARS.sh;
+    GRAMMARS.yml = GRAMMARS.yaml;
+    GRAMMARS.toml = GRAMMARS.yaml;
+    GRAMMARS.xml = GRAMMARS.html;
+    GRAMMARS.svg = GRAMMARS.html;
+    GRAMMARS.scss = GRAMMARS.css;
+    GRAMMARS.less = GRAMMARS.css;
+    GRAMMARS.go = GRAMMARS.js;
+    GRAMMARS.c = GRAMMARS.js;
+    GRAMMARS.cpp = GRAMMARS.js;
+    GRAMMARS.java = GRAMMARS.js;
+
+    function tokenize(text, lang) {
+      if (typeof text !== "string" || text.length === 0) return [];
+      const rules = GRAMMARS[lang] || GRAMMARS.js;
+      let tokens = [text];
+      for (let r = 0; r < rules.length; r++) {
+        const rule = rules[r];
+        const next = [];
+        for (let i = 0; i < tokens.length; i++) {
+          const item = tokens[i];
+          if (typeof item !== "string") {
+            next.push(item);
+            continue;
+          }
+          const flags = rule.pattern.flags.includes("g") ? rule.pattern.flags : rule.pattern.flags + "g";
+          const re = new RegExp(rule.pattern.source, flags);
+          let lastIndex = 0;
+          let match;
+          while ((match = re.exec(item)) !== null) {
+            if (match.index > lastIndex) {
+              next.push(item.slice(lastIndex, match.index));
+            }
+            next.push({ type: rule.type, content: match[0] });
+            lastIndex = re.lastIndex;
+            if (match[0].length === 0) {
+              re.lastIndex++;
+              lastIndex = re.lastIndex;
+            }
+          }
+          if (lastIndex < item.length) {
+            next.push(item.slice(lastIndex));
+          }
+        }
+        tokens = next;
+      }
+      return tokens;
+    }
+
+    function langBadge(rel, lang) {
+      const name = (rel || "").split("/").pop() || "";
+      const ext = name.includes(".") ? name.slice(name.lastIndexOf(".") + 1).toLowerCase() : "";
+      if (ext === "ts" || ext === "mts" || ext === "cts") return "TS";
+      if (ext === "tsx") return "TSX";
+      if (ext === "js" || ext === "mjs" || ext === "cjs") return "JS";
+      if (ext === "jsx") return "JSX";
+      if (ext === "py") return "PYTHON";
+      if (ext === "rs") return "RUST";
+      if (ext === "go") return "GO";
+      if (ext === "json") return "JSON";
+      if (ext === "yaml" || ext === "yml") return "YAML";
+      if (ext === "toml") return "TOML";
+      if (ext === "md" || ext === "markdown") return "MARKDOWN";
+      if (ext === "sh" || ext === "bash" || ext === "zsh") return "SHELL";
+      if (ext === "html" || ext === "htm") return "HTML";
+      if (ext === "css" || ext === "scss" || ext === "less") return "CSS";
+      if (ext === "sql") return "SQL";
+      if (name === "Dockerfile") return "DOCKER";
+      if (name === "Makefile" || name === "Justfile") return "MAKE";
+      if (lang) return lang.toUpperCase();
+      if (ext) return ext.toUpperCase();
+      return "TXT";
+    }
+
+    function parseDiff(diffText) {
+      const rawLines = (diffText || "").split("\n");
+      const rows = [];
+      let oldLine = 0;
+      let newLine = 0;
+      let addedCount = 0;
+      let deletedCount = 0;
+
+      for (let i = 0; i < rawLines.length; i++) {
+        const text = rawLines[i];
+        if (text.startsWith("@@")) {
+          const match = text.match(/@@\s+-(\d+)(?:,\d+)?\s+\+(\d+)(?:,\d+)?\s+@@/);
+          if (match) {
+            oldLine = parseInt(match[1], 10);
+            newLine = parseInt(match[2], 10);
+          }
+          rows.push({ kind: "hunk", text, oldNum: null, newNum: null });
+        } else if (text.startsWith("+++") || text.startsWith("---") || text.startsWith("diff ") || text.startsWith("index ")) {
+          rows.push({ kind: "meta", text, oldNum: null, newNum: null });
+        } else if (text.startsWith("+")) {
+          rows.push({ kind: "add", text: text.slice(1), prefix: "+", oldNum: null, newNum: newLine++ });
+          addedCount++;
+        } else if (text.startsWith("-")) {
+          rows.push({ kind: "del", text: text.slice(1), prefix: "-", oldNum: oldLine++, newNum: null });
+          deletedCount++;
+        } else if (text.startsWith(" ")) {
+          rows.push({ kind: "ctx", text: text.slice(1), prefix: " ", oldNum: oldLine++, newNum: newLine++ });
+        } else if (text === "" && i === rawLines.length - 1) {
+          // trailing newline
+        } else {
+          rows.push({ kind: "meta", text, oldNum: null, newNum: null });
+        }
+      }
+      return { rows, addedCount, deletedCount };
+    }
+
+    function DiffView(props) {
+      const { text, language } = props;
+      const { rows, addedCount, deletedCount } = useMemo(() => parseDiff(text), [text]);
+
+      if (!text) {
+        return h("div", { className: "wb-empty" }, "No diff against HEAD for this path.");
+      }
+
+      return h("div", { className: "wb-diff-view" },
+        h("div", { className: "wb-diff-bar" },
+          h("span", { className: "wb-diff-badge wb-diff-badge--add" }, "+" + addedCount),
+          h("span", { className: "wb-diff-badge wb-diff-badge--del" }, "-" + deletedCount),
+          h("span", { className: "wb-note" }, rows.length + " lines in diff")),
+        h("div", { className: "wb-diff-scroll" },
+          rows.map((row, i) => {
+            const isCode = row.kind === "add" || row.kind === "del" || row.kind === "ctx";
+            const rowTokens = isCode ? tokenize(row.text, language) : null;
+            const renderedLine = rowTokens
+              ? rowTokens.map((tok, j) => typeof tok === "string" ? tok : h("span", { key: j, className: "wb-tok-" + tok.type }, tok.content))
+              : row.text;
+
+            return h("div", { key: i, className: "wb-diff-row wb-diff-row--" + row.kind },
+              h("span", { className: "wb-diff-num wb-diff-num--old" }, row.oldNum !== null ? String(row.oldNum) : ""),
+              h("span", { className: "wb-diff-num wb-diff-num--new" }, row.newNum !== null ? String(row.newNum) : ""),
+              h("span", { className: "wb-diff-mark" }, row.kind === "hunk" ? "" : (row.prefix || " ")),
+              h("span", { className: "wb-diff-line" }, row.kind === "hunk" ? row.text : (row.text === "" ? " " : renderedLine)));
+          })));
+    }
+
+    function CodeEditor(props) {
+      const { initialText, language, onSave, onDirtyChange, editorRef } = props;
+      const [text, setText] = useState(initialText);
+      const preRef = useRef(null);
+      const gutterRef = useRef(null);
+      const localEditorRef = useRef(null);
+      const ref = editorRef || localEditorRef;
+
+      useEffect(() => {
+        setText(initialText);
+      }, [initialText]);
+
+      const lineCount = useMemo(() => text.split("\n").length, [text]);
+
+      const gutterText = useMemo(() => {
+        let res = "";
+        for (let i = 1; i <= lineCount; i++) {
+          res += (i === 1 ? "" : "\n") + i;
+        }
+        return res;
+      }, [lineCount]);
+
+      const tokens = useMemo(() => tokenize(text, language), [text, language]);
+
+      const renderedTokens = useMemo(() => {
+        return tokens.map((tok, i) => {
+          if (typeof tok === "string") return tok;
+          return h("span", { key: i, className: "wb-tok-" + tok.type }, tok.content);
+        });
+      }, [tokens]);
+
+      const onScroll = useCallback((e) => {
+        const { scrollTop, scrollLeft } = e.currentTarget;
+        if (preRef.current) {
+          preRef.current.style.transform = `translate(${-scrollLeft}px, ${-scrollTop}px)`;
+        }
+        if (gutterRef.current) {
+          gutterRef.current.scrollTop = scrollTop;
+        }
+      }, []);
+
+      const onInput = useCallback((e) => {
+        const val = e.target.value;
+        setText(val);
+        if (onDirtyChange) onDirtyChange(val !== initialText);
+      }, [initialText, onDirtyChange]);
+
+      const onKeyDown = useCallback((e) => {
+        if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+          e.preventDefault();
+          if (onSave) onSave(e.currentTarget.value);
+          return;
+        }
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const ta = e.currentTarget;
+          const start = ta.selectionStart;
+          const end = ta.selectionEnd;
+          const val = ta.value;
+          const nextVal = val.slice(0, start) + "  " + val.slice(end);
+          ta.value = nextVal;
+          ta.selectionStart = ta.selectionEnd = start + 2;
+          setText(nextVal);
+          if (onDirtyChange) onDirtyChange(nextVal !== initialText);
+        }
+      }, [initialText, onSave, onDirtyChange]);
+
+      return h("div", { className: "wb-editor-wrap" },
+        h("div", { className: "wb-gutter", ref: gutterRef },
+          h("pre", { className: "wb-gutter-text" }, gutterText)),
+        h("div", { className: "wb-editor-viewport" },
+          h("div", { className: "wb-editor-highlight", ref: preRef, "aria-hidden": "true" },
+            h("pre", { className: "wb-code-pre" },
+              renderedTokens,
+              text.endsWith("\n") ? "\n " : ""
+            )),
+          h("textarea", {
+            ref,
+            className: "wb-editor-input",
+            value: text,
+            onInput,
+            onKeyDown,
+            onScroll,
+            spellCheck: false,
+            wrap: "off",
+            autoFocus: true,
+          }))
+      );
     }
 
     function FilesTab(props) {
@@ -208,14 +586,14 @@ window.__ModuleLoader__.load({
           .finally(() => setBusy(false));
       }, [call, sessionId]);
 
-      const save = useCallback(() => {
+      const save = useCallback((textOverride) => {
         const editor = editorRef.current;
-        if (open === null || editor === null) return;
-        const text = editor.value;
+        if (open === null) return;
+        const text = typeof textOverride === "string" ? textOverride : (editor ? editor.value : open.text);
         setBusy(true); setError(""); setNotice("");
         call("save", { sessionId, root: "", rel: open.rel, text, version: open.version })
           .then((data) => {
-            setOpen((cur) => (cur === null ? cur : { ...cur, text, version: data.version }));
+            setOpen((cur) => (cur === null ? cur : { ...cur, text, version: data.version, size: data.size }));
             setDirty(false);
             setNotice("Saved " + new Date().toLocaleTimeString());
             refresh();
@@ -267,9 +645,13 @@ window.__ModuleLoader__.load({
             : h("span", { className: "wb-note" }, changes?.branch ? "branch " + changes.branch : ""),
           h("span", { className: "wb-spacer" }),
           open !== null ? h(React.Fragment, null,
-            h("span", { className: "wb-note" + (dirty ? " wb-dirty" : "") }, dirty ? "unsaved" : (notice || "saved")),
+            h("span", { className: "wb-badge" }, langBadge(open.rel, open.language)),
+            h("span", { className: "wb-note" }, (open.text.split("\n").length) + " lines · " + fmtSize(open.size)),
+            h("span", { className: "wb-note" + (dirty ? " wb-dirty" : "") },
+              h("span", { className: "wb-status-dot wb-status-dot--" + (dirty ? "dirty" : "clean") }),
+              dirty ? "unsaved (Cmd+S)" : (notice || "saved")),
             h("button", { className: "wb-btn", onClick: () => showDiff(open.rel), disabled: busy }, "Diff"),
-            h("button", { className: "wb-btn wb-btn--primary", onClick: save, disabled: busy || !dirty }, "Save")) : null,
+            h("button", { className: "wb-btn wb-btn--primary", onClick: () => save(), disabled: busy || !dirty }, "Save")) : null,
           diff !== null ? h("button", { className: "wb-btn", onClick: () => openFile(diff.rel), disabled: busy }, "Edit") : null,
           h("button", { className: "wb-btn", onClick: refresh, disabled: busy }, "Refresh")),
         error !== "" ? h("div", { className: "wb-err" }, error) : null,
@@ -277,14 +659,16 @@ window.__ModuleLoader__.load({
           h("div", { className: "wb-pane wb-left" }, rows.length === 0 ? h("div", { className: "wb-empty" }, emptyText) : rows),
           h("div", { className: "wb-pane wb-right" },
             open !== null
-              ? h("textarea", {
-                  // keyed per load, not per save: remounting on save would throw the undo stack away
+              ? h(CodeEditor, {
                   key: open.rel + "#" + open.nonce,
-                  ref: editorRef, className: "wb-editor", defaultValue: open.text,
-                  spellCheck: false, wrap: "off", onInput, onKeyDown,
+                  initialText: open.text,
+                  language: open.language,
+                  editorRef: editorRef,
+                  onDirtyChange: (isDirty) => setDirty(isDirty),
+                  onSave: (currentText) => save(currentText),
                 })
               : diff !== null
-                ? (diff.text === "" ? h("div", { className: "wb-empty" }, "No diff against HEAD for this path.") : h(DiffText, { text: diff.text }))
+                ? h(DiffView, { text: diff.text, language: open?.language })
                 : h("div", { className: "wb-empty" }, mode === "tree" ? "Pick a file to edit it. Cmd+S saves." : "Pick a changed file to see its diff."))));
     }
 
@@ -487,7 +871,7 @@ window.__ModuleLoader__.load({
         return () => {
           observer.disconnect();
           for (const node of document.querySelectorAll(".wb-runbtn, .wb-runout")) node.remove();
-          for (const block of document.querySelectorAll('[data-dsh-runnable="1"]')) delete block.dataset.dshRunnable;
+          for (const block of document.querySelectorAll('[data-mind-runnable="1"]')) delete block.dataset.dshRunnable;
         };
       }, "dsh-workbench: runnable code blocks");
     }
@@ -499,7 +883,7 @@ window.__ModuleLoader__.load({
       ctx.effect(() => ctx.locale.register(NS, { zh, en }), "dsh-workbench: dictionaries");
       const t = ctx.locale.bind(NS);
       const call = async (method, args) => {
-        const r = await ctx.connection.rpc.call("/api", "dshWorkbench/" + method, { args: args || {} });
+        const r = await ctx.connection.rpc.call("/api", "workbench/" + method, { args: args || {} });
         if (r && r.ok) return r.value;
         const e = r && r.error;
         throw new Error(e ? e.message : "request failed");
@@ -509,7 +893,7 @@ window.__ModuleLoader__.load({
       const Terminal = withCall(TerminalTab);
       installRunnableBlocks(ctx, call);
       ctx.slots.inject("conversation.session.header.utilities", () => ctx.slots.register(
-        { name: "conversation.session.header.utilities", id: "dsh-workbench-session-probe", order: 900 }, SessionProbe));
+        { name: "conversation.session.header.utilities", id: "mind-session-probe", order: 900 }, SessionProbe));
       ctx.slots.inject("conversation.view", function* () {
         yield ctx.slots.register({ name: "conversation.view", id: "files", order: 60, label: () => t("files") }, Files);
         yield ctx.slots.register({ name: "conversation.view", id: "terminal", order: 70, label: () => t("terminal") }, Terminal);

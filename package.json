@@ -6,7 +6,8 @@
   "scripts": {
     "build": "pnpm -r run build",
     "test": "pnpm -r run test",
-    "typecheck": "pnpm -r run typecheck"
+    "typecheck": "pnpm -r run typecheck",
+    "link-plugins": "node scripts/install.js web"
   },
   "devDependencies": {
     "@deepseek-ai/schemastery": "^3.18.2",

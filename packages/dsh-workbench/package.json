@@ -1,6 +1,6 @@
 {
   "name": "dsh-workbench",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "DeepSeek Harness Workbench — Files and Terminal tabs in the conversation view: browse files, inspect git diffs, edit in browser, and run shell commands",
   "type": "module",
   "main": "lib/index.js",

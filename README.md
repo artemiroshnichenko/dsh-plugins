@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![DeepSeek Harness](https://img.shields.io/badge/DeepSeek%20Harness-Compatible-059669)](https://github.com/deepseek-ai/deepseek-harness)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-3178c6)](https://www.typescriptlang.org/)
-[![Tests](https://img.shields.io/badge/Tests-122%20passed-22c55e)](#)
+[![Tests](https://img.shields.io/badge/Tests-155%20passed-22c55e)](#)
 [![pnpm](https://img.shields.io/badge/pnpm-workspace-orange)](https://pnpm.io/)
 
 A curated collection of production-grade plugins and extensions for [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness).
@@ -18,11 +18,13 @@ These plugins turn DeepSeek Harness into a full-featured AI development environm
 | Package | Category | Description | Web GUI | Tests |
 | :--- | :--- | :--- | :---: | :---: |
 | [`dsh-guard`](./packages/dsh-guard) | **Security & Guardrails** | Monotonic tool interception, destructive command prevention, and approval gating | — | 13 passed |
-| [`dsh-workbench`](./packages/dsh-workbench) | **Developer Tools** | File tree explorer, full terminal emulator (xterm.js), and one-click code runner | Yes | 11 passed |
+| [`dsh-workbench`](./packages/dsh-workbench) | **Developer Tools** | File tree explorer, live editor with syntax highlighting & gutter, visual diffs, and terminal emulator | Yes | 17 passed |
+| [`dsh-chat-ux`](./packages/dsh-chat-ux) | **UX & Controls** | Claude Code-style conversation layout, tool call folding, and fork/rollback actions | Yes | 13 passed |
+| [`dsh-git`](./packages/dsh-git) | **Git & Worktrees** | Worktree manager, branch switcher, dirty status indicator, and GitHub PR integration | Yes | 13 passed |
 | [`dsh-ssh`](./packages/dsh-ssh) | **Remote Execution** | Remote agent execution over SSH with ACP bridge and browser approval relay | Yes | 80 passed |
 | [`dsh-console`](./packages/dsh-console) | **Observability** | Skills & MCP servers inspector panel with `/skills` and `/mcp` slash commands | Yes | 3 passed |
 | [`dsh-env`](./packages/dsh-env) | **System Prompt** | Dynamic environment variables (`today`, `platform`, `harness_version`, etc.) | — | 5 passed |
-| [`dsh-updater`](./packages/dsh-updater) | **Lifecycle & Updates** | Automated update detection, one-click Web GUI upgrades, and auto-restart | Yes | 10 passed |
+| [`dsh-updater`](./packages/dsh-updater) | **Lifecycle & Updates** | Automated update detection, one-click Web GUI upgrades, and auto-restart | Yes | 11 passed |
 
 ---
 
@@ -73,19 +75,42 @@ Keep DeepSeek Harness and all community plugins continuously updated right from 
 
 ## Installation & Usage
 
-### Quick Setup
+### 1. Clone and Link Plugins
 
-Add the desired plugins to your local `~/.dsh/cordis.patch.yml`:
+Clone this repository and run the automated installer to link all plugins into your DeepSeek Harness profile (`web` by default):
+
+```bash
+git clone https://github.com/artemiroshnichenko/dsh-plugins.git
+cd dsh-plugins
+pnpm install
+pnpm build
+pnpm run link-plugins
+```
+
+### 2. Enable in Configuration
+
+Add the desired plugins to your local `~/.dsh/cordis.patch.yml` or `~/.dsh/profiles/web/cordis.patch.yml`:
 
 ```yaml
 - insert:
+    - id: workbench
+      name: dsh-workbench
+
+    - id: chat-ux
+      name: dsh-chat-ux
+      config:
+        dedupSystemPrompts: true
+        pageByTurn: true
+
+    - id: git
+      name: dsh-git
+      config:
+        ghEnabled: true
+
     - id: guard
       name: dsh-guard
       config:
         blockSshMutations: true
-
-    - id: workbench
-      name: dsh-workbench
 
     - id: console
       name: dsh-console
