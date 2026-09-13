@@ -6,14 +6,17 @@ describe("dsh-chat-ux config schema", () => {
     const validated = Config({});
     expect(validated.dedupSystemPrompts).toBe(true);
     expect(validated.pageByTurn).toBe(true);
+    expect(validated.collapseTools).toBe(true);
   });
 
   it("respects custom config", () => {
     const validated = Config({
       dedupSystemPrompts: false,
       pageByTurn: false,
+      collapseTools: false,
     });
     expect(validated.dedupSystemPrompts).toBe(false);
     expect(validated.pageByTurn).toBe(false);
+    expect(validated.collapseTools).toBe(false);
   });
 });

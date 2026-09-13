@@ -22,6 +22,7 @@ export interface ChatUxConfig {
   pageByTurn?: boolean;
   enableRollback?: boolean;
   enableFork?: boolean;
+  collapseTools?: boolean;
 }
 
 export const NAMESPACE = "dshChatUx";
@@ -40,6 +41,9 @@ export const Config: Schema<ChatUxConfig> = Schema.object({
   enableFork: Schema.boolean()
     .default(true)
     .description("Enable conversation branching/forking from any user or assistant message"),
+  collapseTools: Schema.boolean()
+    .default(true)
+    .description("Automatically collapse invoked tool calls into expandable disclosures"),
 });
 
 export default class DshChatUx extends TypertRemoteService {

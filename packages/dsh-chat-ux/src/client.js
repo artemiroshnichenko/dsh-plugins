@@ -74,6 +74,52 @@ window.__ModuleLoader__.load({
         opacity: 1;
         transform: translateX(-50%) translateY(-4px);
       }
+
+      /* Tool collapsing styles */
+      .dsh-chat-ux-tool-hidden {
+        display: none !important;
+      }
+
+      .dsh-chat-ux-custom-process {
+        display: flex;
+        align-items: center;
+        margin: 6px 0;
+        width: 100%;
+      }
+
+      .dsh-chat-ux-process-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 14px;
+        border: 1px solid var(--dsw-alias-border-secondary, rgba(255, 255, 255, 0.12));
+        background: var(--dsw-alias-surface-secondary, rgba(255, 255, 255, 0.05));
+        color: var(--dsw-alias-label-secondary, #aaa);
+        font-size: 12px;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        user-select: none;
+      }
+
+      .dsh-chat-ux-process-btn:hover {
+        background: var(--dsw-alias-surface-tertiary, rgba(255, 255, 255, 0.1));
+        color: var(--dsw-alias-label-primary, #fff);
+        border-color: var(--dsw-alias-border-primary, rgba(255, 255, 255, 0.25));
+      }
+
+      .dsh-chat-ux-process-btn .dsh-chat-ux-chevron {
+        width: 14px;
+        height: 14px;
+        color: var(--dsw-alias-label-tertiary, #888);
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .dsh-chat-ux-process-btn[aria-expanded="true"] .dsh-chat-ux-chevron {
+        transform: rotate(180deg);
+      }
     `;
 
     const REVERT_SVG = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6.5H9.5C11.433 6.5 13 8.067 13 10C13 11.933 11.433 13.5 9.5 13.5H4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 4L4 6.5L6.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -600,11 +646,282 @@ window.__ModuleLoader__.load({
       }, true);
     }
 
+    /**
+     * Fixes the fatal React crash where PendingSubmissionBubble expects submission.images to be an array,
+     * but @deepseek-ai/dsh-api-session-controller sets attachments without images.
+     * When Enter was pressed, submission.images.map(...) threw TypeError, unmounting ChatView and
+     * blanking out the entire chat history until page reload.
+     */
+    function setupSubmissionCrashFix(ctx) {
+      const sessions = ctx.get?.("sessions");
+      if (!sessions) return;
+
+      function patchSessionInstance(session) {
+        if (!session) return;
+        const proto = Object.getPrototypeOf(session);
+        if (!proto || proto.__dsh_chat_ux_fix_patched) return;
+        proto.__dsh_chat_ux_fix_patched = true;
+
+        const origBeginSubmission = proto.beginSubmission;
+        if (typeof origBeginSubmission === "function") {
+          proto.beginSubmission = function (input) {
+            if (input && !input.images) {
+              input.images = [];
+            }
+            const handle = origBeginSubmission.call(this, input);
+            if (Array.isArray(this.pendingSubmissions)) {
+              for (const s of this.pendingSubmissions) {
+                if (s && !Array.isArray(s.images)) {
+                  s.images = Array.isArray(s.attachments)
+                    ? s.attachments
+                        .filter((a) => a && (a.type === "image" || a.previewUrl))
+                        .map((a) => ({
+                          previewUrl: a.previewUrl || "",
+                          ...(a.name ? { name: a.name } : {}),
+                          ...(a.width ? { width: a.width } : {}),
+                          ...(a.height ? { height: a.height } : {}),
+                        }))
+                    : [];
+                }
+              }
+            }
+            return handle;
+          };
+        }
+      }
+
+      const curId = sessions.list?.getSnapshot()?.current;
+      if (curId) {
+        const binding = sessions.binding?.(curId);
+        if (binding?.session) patchSessionInstance(binding.session);
+      }
+
+      const origBinding = sessions.binding?.bind(sessions);
+      if (origBinding) {
+        sessions.binding = function (id) {
+          const binding = origBinding(id);
+          if (binding?.session) patchSessionInstance(binding.session);
+          return binding;
+        };
+      }
+
+      if (sessions.list?.subscribe) {
+        sessions.list.subscribe(() => {
+          const id = sessions.list.getSnapshot()?.current;
+          if (id) {
+            const binding = sessions.binding?.(id);
+            if (binding?.session) patchSessionInstance(binding.session);
+          }
+        });
+      }
+    }
+
+    /**
+     * Tool Call Folding module:
+     * Automatically groups and folds tool calls in each turn under an expandable disclosure.
+     * Works across both historical turns (regardless of historyIncomplete / pagination)
+     * and running turns.
+     */
+    function setupToolCollapsing(ctx) {
+      if (typeof document === "undefined") return;
+
+      const turnExpandedState = new Map();
+      let scheduled = false;
+
+      function scheduleUpdate() {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(() => {
+          scheduled = false;
+          updateTurnCollapsing();
+        });
+      }
+
+      function updateTurnCollapsing() {
+        const chatContainers = document.querySelectorAll("[data-chat-flow], [data-chat-flow-container]");
+        if (chatContainers.length === 0) return;
+
+        chatContainers.forEach((container) => {
+          const flowItems = Array.from(container.children).filter((el) =>
+            el.hasAttribute?.("data-chat-turn")
+          );
+          if (flowItems.length === 0) return;
+
+          const turnMap = new Map();
+          for (const item of flowItems) {
+            const turn = item.getAttribute("data-chat-turn");
+            if (!turn) continue;
+            if (!turnMap.has(turn)) turnMap.set(turn, []);
+            turnMap.get(turn).push(item);
+          }
+
+          for (const [turn, items] of turnMap.entries()) {
+            const toolCalls = items.filter(
+              (el) => el.getAttribute("data-chat-flow-kind") === "tool-call"
+            );
+            if (toolCalls.length === 0) continue;
+
+            const nativeProcess = items.find(
+              (el) => el.getAttribute("data-chat-flow-kind") === "turn-process"
+            );
+
+            const isExpanded = turnExpandedState.get(turn) === true;
+
+            if (nativeProcess) {
+              const existingCustom = container.querySelector(
+                `.dsh-chat-ux-custom-process[data-chat-turn="${turn}"]`
+              );
+              if (existingCustom) existingCustom.remove();
+
+              const btn = nativeProcess.querySelector("button[data-turn-process]");
+              if (btn) {
+                btn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+              }
+
+              for (const tc of toolCalls) {
+                if (isExpanded) {
+                  tc.classList.remove("dsh-chat-ux-tool-hidden");
+                  tc.removeAttribute("hidden");
+                } else {
+                  tc.classList.add("dsh-chat-ux-tool-hidden");
+                  tc.setAttribute("hidden", "until-found");
+                }
+              }
+
+              const firstToolIdx = items.indexOf(toolCalls[0]);
+              const lastToolIdx = items.indexOf(toolCalls[toolCalls.length - 1]);
+              for (let i = firstToolIdx; i <= lastToolIdx; i++) {
+                const item = items[i];
+                if (item.getAttribute("data-chat-flow-kind") === "assistant-step") {
+                  const hasMarkdown = item.querySelector("[class*='markdown'], [class*='text']");
+                  if (!hasMarkdown || !hasMarkdown.textContent?.trim()) {
+                    if (isExpanded) {
+                      item.classList.remove("dsh-chat-ux-tool-hidden");
+                      item.removeAttribute("hidden");
+                    } else {
+                      item.classList.add("dsh-chat-ux-tool-hidden");
+                      item.setAttribute("hidden", "until-found");
+                    }
+                  }
+                }
+              }
+            } else {
+              let customProcess = container.querySelector(
+                `.dsh-chat-ux-custom-process[data-chat-turn="${turn}"]`
+              );
+
+              const count = toolCalls.length;
+              const label = count === 1 ? "1 tool call" : `${count} tool calls`;
+
+              if (!customProcess) {
+                customProcess = document.createElement("div");
+                customProcess.className = "wmdBtW_flowItem dsh-chat-ux-custom-process";
+                customProcess.setAttribute("data-chat-turn", turn);
+                customProcess.setAttribute("data-chat-flow-kind", "turn-process");
+
+                customProcess.innerHTML = `
+                  <button type="button" class="dsh-chat-ux-process-btn" data-turn-process="${turn}" aria-expanded="${isExpanded ? 'true' : 'false'}">
+                    <span class="dsh-chat-ux-process-label">${label}</span>
+                    <svg width="14" height="14" class="dsh-chat-ux-chevron" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.8486 5.5L11.4238 5.92383L8.69727 8.65137C8.44157 8.90706 8.21562 9.13382 8.01172 9.29785C7.79912 9.46883 7.55595 9.61756 7.25 9.66602C7.08435 9.69222 6.91565 9.69222 6.75 9.66602C6.44405 9.61756 6.20088 9.46883 5.98828 9.29785C5.78438 9.13382 5.55843 8.90706 5.30273 8.65137L2.57617 5.92383L2.15137 5.5L3 4.65137L3.42383 5.07617L6.15137 7.80273C6.42595 8.07732 6.59876 8.24849 6.74023 8.3623C6.87291 8.46904 6.92272 8.47813 6.9375 8.48047C6.97895 8.48703 7.02105 8.48703 7.0625 8.48047C7.07728 8.47813 7.12709 8.46904 7.25977 8.3623C7.40124 8.24849 7.57405 8.07732 7.84863 7.80273L10.5762 5.07617L11 4.65137L11.8486 5.5Z" fill="currentColor"/>
+                    </svg>
+                  </button>
+                `;
+
+                const btn = customProcess.querySelector("button");
+                btn.addEventListener("click", () => {
+                  const nowExpanded = turnExpandedState.get(turn) === true;
+                  turnExpandedState.set(turn, !nowExpanded);
+                  scheduleUpdate();
+                });
+
+                const firstToolCall = toolCalls[0];
+                firstToolCall.parentNode.insertBefore(customProcess, firstToolCall);
+              } else {
+                const labelEl = customProcess.querySelector(".dsh-chat-ux-process-label");
+                if (labelEl) {
+                  labelEl.textContent = label;
+                }
+                const btn = customProcess.querySelector("button");
+                if (btn) {
+                  btn.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+                }
+              }
+
+              for (const tc of toolCalls) {
+                if (isExpanded) {
+                  tc.classList.remove("dsh-chat-ux-tool-hidden");
+                  tc.removeAttribute("hidden");
+                } else {
+                  tc.classList.add("dsh-chat-ux-tool-hidden");
+                  tc.setAttribute("hidden", "until-found");
+                }
+              }
+
+              const firstToolIdx = items.indexOf(toolCalls[0]);
+              const lastToolIdx = items.indexOf(toolCalls[toolCalls.length - 1]);
+              for (let i = firstToolIdx; i <= lastToolIdx; i++) {
+                const item = items[i];
+                if (item.getAttribute("data-chat-flow-kind") === "assistant-step") {
+                  const hasMarkdown = item.querySelector("[class*='markdown'], [class*='text']");
+                  if (!hasMarkdown || !hasMarkdown.textContent?.trim()) {
+                    if (isExpanded) {
+                      item.classList.remove("dsh-chat-ux-tool-hidden");
+                      item.removeAttribute("hidden");
+                    } else {
+                      item.classList.add("dsh-chat-ux-tool-hidden");
+                      item.setAttribute("hidden", "until-found");
+                    }
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      const sessions = ctx.get?.("sessions");
+      if (sessions?.list?.subscribe) {
+        sessions.list.subscribe(() => {
+          turnExpandedState.clear();
+          scheduleUpdate();
+        });
+      }
+
+      // Delegated click listener to toggle turn collapsing
+      document.addEventListener(
+        "click",
+        (e) => {
+          const btn = e.target && e.target.closest ? e.target.closest("button[data-turn-process]") : null;
+          if (!btn) return;
+          const turn = btn.getAttribute("data-turn-process");
+          if (!turn) return;
+          const currentlyExpanded = turnExpandedState.get(turn) === true;
+          turnExpandedState.set(turn, !currentlyExpanded);
+          scheduleUpdate();
+        },
+        true
+      );
+
+      const observer = new MutationObserver(() => {
+        scheduleUpdate();
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+      });
+
+      scheduleUpdate();
+    }
+
     const inject = ["slots", "sessions", "connection"];
 
     function apply(ctx) {
       window.__dsh_chat_ux_ctx = ctx;
       installStyles();
+      setupSubmissionCrashFix(ctx);
+      setupToolCollapsing(ctx);
       checkPendingRevertPrompt();
       setupRollbackAndFork(ctx);
       setupComposerHistory();
